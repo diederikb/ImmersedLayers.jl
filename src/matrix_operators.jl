@@ -30,6 +30,37 @@ function create_RTLinvR(cache::BasicILMCache{N};scale=1.0) where {N}
 end
 
 """
+    create_RTLinvR_scalar(cache::BasicILMCache[;scale=1.0])
+
+Using the provided cache `cache`, construct the square matrix ``-R^T L^{-1}R``, which maps data of the scalar point data type of the cache
+to data of the same type. The operators `R^T` and `R` correspond to [`interpolate!`](@ref) and
+[`regularize!`](@ref) and `L^{-1}` is the inverse of the grid Laplacian. The optional keyword `scale` multiplies the
+matrix by the designated value.
+"""
+function create_RTLinvR_scalar(cache::BasicILMCache{N,SCA,G};scale=1.0) where {N,SCA,G<:Edges{Primal}}
+    @unpack L, sscalar_cache, gcurl_cache = cache
+
+    len = length(sscalar_cache)
+    A = Matrix{eltype(sscalar_cache)}(undef,len,len)
+    fill!(sscalar_cache,0.0)
+
+    for col in 1:len
+        sscalar_cache[col] = 1.0
+        fill!(gcurl_cache,0.0)
+
+        regularize!(gcurl_cache,sscalar_cache,cache)
+        inverse_laplacian!(gcurl_cache,cache)
+        interpolate!(sscalar_cache,gcurl_cache,cache)
+
+        A[:,col] = -scale*sscalar_cache
+        fill!(sscalar_cache,0.0)
+    end
+
+    return A
+
+end
+
+"""
     create_CLinvCT(cache::BasicILMCache[;scale=1.0])
 
 Using the provided cache `cache`, construct the square matrix ``-C_s L^{-1}C_s^T``, which maps
