@@ -3,6 +3,7 @@
 struct ScalarPotentialCache{DVT,VNT,FT} <: AbstractExtraILMCache
    dv :: DVT
    dvn :: VNT
+   vn :: VNT
    ftemp :: FT
    divv_temp :: FT
 end
@@ -10,6 +11,7 @@ end
 struct VectorPotentialCache{DVT,VNT,ST} <: AbstractExtraILMCache
    dv :: DVT
    dvn :: VNT
+   vn :: VNT
    stemp :: ST
    curlv_temp :: ST
 end
@@ -36,7 +38,8 @@ function ScalarPotentialCache(base_cache::AbstractBasicCache{N,GCT}) where {N,GC
     ftemp = zeros_griddiv(base_cache)
     divv_temp = zeros_griddiv(base_cache)
     dvn = ScalarData(dv)
-    ScalarPotentialCache(dv,dvn,ftemp,divv_temp)
+    vn = ScalarData(dv)
+    ScalarPotentialCache(dv,dvn,vn,ftemp,divv_temp)
 end
 
 """
@@ -51,7 +54,8 @@ function VectorPotentialCache(base_cache::BasicILMCache)
     stemp = zeros_gridcurl(base_cache)
     curlv_temp = zeros_gridcurl(base_cache)
     dvn = ScalarData(dv)
-    VectorPotentialCache(dv,dvn,stemp,curlv_temp)
+    vn = ScalarData(dv)
+    VectorPotentialCache(dv,dvn,vn,stemp,curlv_temp)
 end
 
 """
