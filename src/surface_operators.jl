@@ -11,6 +11,7 @@ onto the grid in the form of scalar grid data `s`. This is the adjoint
 to [`interpolate!`](@ref)
 """
 @inline regularize!(s::Nodes{Primal},f::ScalarData,cache::BasicILMCache) = regularize!(s,f,cache.R)
+@inline regularize!(s::Nodes{Primal},f::ScalarData,cache::BasicILMCache{N,SC,GCT}) where {N,SC<:AbstractScalingType,GCT<:Edges} = regularize!(s,f,cache.Rdiv)
 
 """
     regularize!(s::Nodes{Dual},f::ScalarData,cache::BasicILMCache)
@@ -54,6 +55,7 @@ onto the surface points in the form of scalar point data `f`. This is the adjoin
 to [`regularize!`](@ref)
 """
 @inline interpolate!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache) = interpolate!(f,s,cache.E)
+@inline regularize!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache{N,SC,GCT}) where {N,SC<:AbstractScalingType,GCT<:Edges} = interpolate!(f,s,cache.Ediv)
 
 """
     interpolate!(f::ScalarData,s::Nodes{Dual},cache::BasicILMCache)
