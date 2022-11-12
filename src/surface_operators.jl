@@ -54,8 +54,8 @@ The operation ``f = R_c^T s``, which interpolates scalar grid data `s`
 onto the surface points in the form of scalar point data `f`. This is the adjoint
 to [`regularize!`](@ref)
 """
-@inline interpolate!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache) = interpolate!(f,s,cache.E)
-@inline regularize!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache{N,SC,GCT}) where {N,SC<:AbstractScalingType,GCT<:Edges} = interpolate!(f,s,cache.Ediv)
+@inline interpolate!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache{N,SC,GCT}) where {N,SC<:AbstractScalingType,GCT<:Nodes} = interpolate!(f,s,cache.E)
+@inline interpolate!(f::ScalarData,s::Nodes{Primal},cache::BasicILMCache{N,SC,GCT}) where {N,SC<:AbstractScalingType,GCT<:Edges} = interpolate!(f,s,cache.Ediv)
 
 """
     interpolate!(f::ScalarData,s::Nodes{Dual},cache::BasicILMCache)
@@ -97,11 +97,12 @@ The operation ``\\mathbf{v} = R_f \\mathbf{n}\\circ f``, which maps scalar surfa
 a jump in scalar potential) to grid data `v` (like velocity). This is the adjoint
 to [`normal_interpolate!`](@ref).
 """
-@inline regularize_normal!(q::Edges{Primal},f::ScalarData,cache::BasicILMCache) = regularize_normal!(q,f,cache.nrm,cache.Rsn,cache.snorm_cache)
+@inline regularize_normal!(q::Edges{Primal},f::ScalarData,cache::BasicILMCache{N,SCA,GCT}) where {N,SCA,GCT<:Nodes} = regularize_normal!(q,f,cache.nrm,cache.Rsn,cache.snorm_cache)
+@inline regularize_normal!(q::Edges{Primal},f::ScalarData,cache::BasicILMCache{N,SCA,GCT}) where {N,SCA,GCT<:Edges} = regularize_normal!(q,f,cache.nrm,cache.R,cache.sdata_cache)
 
-function regularize_normal!(q::Edges{Primal,NX,NY},f::ScalarData{N},nrm::VectorData{N},Rf::RegularizationMatrix,snorm_cache::VectorData{N}) where {NX,NY,N}
-    product!(snorm_cache,nrm,f)
-    mul!(q,Rf,snorm_cache)
+function regularize_normal!(q::Edges{Primal,NX,NY},f::ScalarData{N},nrm::VectorData{N},Rf::RegularizationMatrix,svec_cache::VectorData{N}) where {NX,NY,N}
+    product!(svec_cache,nrm,f)
+    mul!(q,Rf,svec_cache)
 end
 
 """
@@ -227,11 +228,12 @@ The operation ``v_n = \\mathbf{n} \\cdot R_f^T \\mathbf{v}``, which maps grid da
 surface data `vn` (like normal component of surface velocity). This is the
 adjoint to [`regularize_normal!`](@ref).
 """
-@inline normal_interpolate!(vn::ScalarData,q::Edges{Primal},cache::BasicILMCache) = normal_interpolate!(vn,q,cache.nrm,cache.Esn,cache.snorm_cache)
+@inline normal_interpolate!(vn::ScalarData,q::Edges{Primal},cache::BasicILMCache{N,SCA,GCT}) where {N,SCA,GCT<:Nodes} = normal_interpolate!(vn,q,cache.nrm,cache.Esn,cache.snorm_cache)
+@inline normal_interpolate!(vn::ScalarData,q::Edges{Primal},cache::BasicILMCache{N,SCA,GCT}) where {N,SCA,GCT<:Edges} = normal_interpolate!(vn,q,cache.nrm,cache.E,cache.sdata_cache)
 
-function normal_interpolate!(vn::ScalarData{N},q::Edges{Primal,NX,NY},nrm::VectorData{N},Ef::InterpolationMatrix,snorm_cache::VectorData{N}) where {NX,NY,N}
-    mul!(snorm_cache,Ef,q)
-    pointwise_dot!(vn,nrm,snorm_cache)
+function normal_interpolate!(vn::ScalarData{N},q::Edges{Primal,NX,NY},nrm::VectorData{N},Ef::InterpolationMatrix,svec_cache::VectorData{N}) where {NX,NY,N}
+    mul!(svec_cache,Ef,q)
+    pointwise_dot!(vn,nrm,svec_cache)
 end
 
 """
