@@ -86,28 +86,17 @@ _static_surfaces(::Nothing) = true
 _static_surfaces(::Any) = false
 
 # Extend surface_velocity! and allow for null motions
-RigidBodyTools.surface_velocity!(vec::VectorData,bl::Union{Body,BodyList},motions::Union{RigidBodyTools.AbstractMotion,MotionList},t) =
-    surface_velocity!(vec.u,vec.v,bl,motions,t)
+RigidBodyTools.surface_velocity!(vec::VectorData,bl::Union{Body,BodyList},motions::Union{RigidBodyTools.AbstractMotion,MotionList},t;kwargs...) =
+    surface_velocity!(vec.u,vec.v,bl,motions,t;kwargs...)
 
 RigidBodyTools.surface_velocity!(vec::VectorData,bl::Union{Body,BodyList},motions,t) = fill!(vec,0.0)
 
-RigidBodyTools.surface_velocity!(vec::VectorData,base_cache::BasicILMCache,motions,t) =
-    surface_velocity!(vec,base_cache.bl,motions,t)
+RigidBodyTools.surface_velocity!(vec::VectorData,base_cache::BasicILMCache,motions,t;kwargs...) =
+    surface_velocity!(vec,base_cache.bl,motions,t;kwargs...)
 
-RigidBodyTools.surface_velocity!(vec::VectorData,sys::ILMSystem,t) =
-    surface_velocity!(vec,sys.base_cache,sys.motions,t)
+RigidBodyTools.surface_velocity!(vec::VectorData,sys::ILMSystem,t;kwargs...) =
+    surface_velocity!(vec,sys.base_cache,sys.motions,t;kwargs...)
 
-#=
-function RigidBodyTools.surface_velocity!(u::AbstractVector,v::AbstractVector,sys::ILMSystem,t)
-  @unpack base_cache, motions = sys
-  @unpack bl = base_cache
-  fill!(u,0.0)
-  fill!(v,0.0)
-  if !isnothing(motions)
-    surface_velocity!(u,v,bl,motions,t)
-  end
-end
-=#
 
 # Create the basic solve function, to be extended
 function solve(prob::AbstractILMProblem,sys::ILMSystem) end
@@ -151,7 +140,7 @@ end
 ## Extend functions on `BasicILMCache` type to `ILMSystem`
 @inline CartesianGrids.cellsize(sys::ILMSystem) = cellsize(sys.base_cache)
 
-for f in [:get_grid,:zeros_surface,:zeros_surfacescalar,
+for f in [:get_grid,:get_bodies,:zeros_surface,:zeros_surfacescalar,
           :zeros_grid,:zeros_gridcurl,:zeros_griddiv,:zeros_gridgrad,:zeros_gridgradcurl,
           :similar_surface,:similar_surfacescalar,
           :similar_grid,:similar_gridcurl,:similar_griddiv,:similar_gridgrad,:similar_gridgradcurl,
