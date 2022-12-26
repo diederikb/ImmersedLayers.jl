@@ -237,6 +237,7 @@ function _surfacecache(bl::BodyList,X::VectorData{N},a,nrm,g::PhysicalGrid{ND},d
 
   coeff_factor = 1.0
   with_inverse = true
+  println("setting nthreads to $(Threads.nthreads())")
   L = _get_laplacian(gdata_cache,coeff_factor,g,with_inverse,scaling;dtype=dtype)
 
   return BasicILMCache{N,scaling,typeof(gdata_cache),ND,typeof(bl),typeof(nrm),typeof(a),typeof(regop),
@@ -307,9 +308,9 @@ _get_regularization(body::Union{Body,BodyList},args...;kwargs...) = _get_regular
 
 # Standardize the Laplacian
 _get_laplacian(a,coeff_factor::Real,g::PhysicalGrid,with_inverse,::Type{IndexScaling};dtype=Float64) =
-               CartesianGrids.plan_laplacian(a,with_inverse=with_inverse,factor=coeff_factor,dtype=dtype)
+               CartesianGrids.plan_laplacian(a,with_inverse=with_inverse,factor=coeff_factor,dtype=dtype,nthreads=Threads.nthreads())
 _get_laplacian(a,coeff_factor::Real,g::PhysicalGrid,with_inverse,::Type{GridScaling};dtype=Float64) =
-               CartesianGrids.plan_laplacian(a,with_inverse=with_inverse,factor=coeff_factor/cellsize(g)^2,dtype=dtype)
+               CartesianGrids.plan_laplacian(a,with_inverse=with_inverse,factor=coeff_factor/cellsize(g)^2,dtype=dtype,nthreads=Threads.nthreads())
 
 # This is needed to stabilize the type-unstable `RegularizationMatrix` function in
 # CartesianGrids
