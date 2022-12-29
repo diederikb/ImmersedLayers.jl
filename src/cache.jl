@@ -263,14 +263,16 @@ struct PointCollectionCache{N,GCT,ND,PT,REGT<:Regularize,SST} <: AbstractBasicCa
     sdata_cache :: SST
 end
 
-function ScalarPointCollectionCache(X::VectorData{N},g::PhysicalGrid{ND};ddftype = DEFAULT_DDF,dtype = DEFAULT_DATA_TYPE) where {N,ND}
-    gdata_cache = Nodes(Primal,size(g),dtype = dtype)
+function ScalarPointCollectionCache(X::VectorData{N},g::PhysicalGrid{ND},data_prototype::GridData;
+	ddftype = DEFAULT_DDF,dtype = DEFAULT_DATA_TYPE) where {N,ND}
+    gdata_cache = similar(data_prototype)
     sdata_cache = ScalarData(X,dtype = dtype)
     return _pointcollectioncache(X,g,gdata_cache,sdata_cache,ddftype)
 end
 
-function VectorPointCollectionCache(X::VectorData{N},g::PhysicalGrid{ND};ddftype = DEFAULT_DDF,dtype = DEFAULT_DATA_TYPE) where {N,ND}
-    gdata_cache = Edges(Primal,size(g),dtype = dtype)
+function VectorPointCollectionCache(X::VectorData{N},g::PhysicalGrid{ND},data_prototype::GridData;
+	ddftype = DEFAULT_DDF,dtype = DEFAULT_DATA_TYPE) where {N,ND}
+    gdata_cache = similar(data_prototype)
     sdata_cache = VectorData(X,dtype = dtype)
     return _pointcollectioncache(X,g,gdata_cache,sdata_cache,ddftype)
 end

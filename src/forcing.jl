@@ -211,14 +211,14 @@ for f in [:Scalar,:Vector]
     end
 
     @eval function PointRegionCache(g::PhysicalGrid,pts::VectorData,data_prototype::$gdtype;kwargs...)
-        cache = $pcname(pts,g;kwargs...)
+        cache = $pcname(pts,g,data_prototype;kwargs...)
 
         str = similar(cache.sdata_cache)
         return PointRegionCache{typeof(str),typeof(cache)}(str,cache)
     end
 
     @eval function PointRegionCache(g::PhysicalGrid,pts::Function,data_prototype::$gdtype;kwargs...)
-        cache = $pcname(VectorData(0),g;kwargs...)
+        cache = $pcname(VectorData(0),g,data_prototype;kwargs...)
 
         str = similar(cache.sdata_cache)
         return PointRegionCache{typeof(str),typeof(cache)}(str,cache)
