@@ -46,6 +46,7 @@ function update_system!(sys::ILMSystem,u,sysold::ILMSystem,t)
     sysnew = update_system(sysold,bodies)
     sys.base_cache = sysnew.base_cache
     sys.extra_cache = sysnew.extra_cache
+    sys.motions = sysnew.motions
     return sys
 end
 
